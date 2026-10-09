@@ -1,0 +1,15 @@
+# Initial scope: ignore everything at the project root, then include listed paths.
+/*
+!/.gitignore
+!/README.md
+
+!/04/
+/04/*
+!/04/evaluate_batch_1009.py
+!/04/run_04.py
+!/04/experiment_flow_1008.py
+
+!/09/
+/09/*
+!/09/run_1009.py
+!/09/batch_1009.csv
