@@ -13,3 +13,13 @@
 /09/*
 !/09/run_1009.py
 !/09/batch_1009.csv
+
+# MLP and NumPy exercises added on 2026-10-10.
+!/04/mlp_forward_1009.py
+!/04/mlp_step_1010.py
+!/04/mlp_train_1010.py
+
+!/10/
+/10/*
+!/10/teacher_t01_1010.py
+!/10/teacher_t02_1010.py
