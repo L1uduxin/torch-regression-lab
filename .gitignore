@@ -23,3 +23,18 @@
 /10/*
 !/10/teacher_t01_1010.py
 !/10/teacher_t02_1010.py
+
+# Model comparison, clustering iteration and synthetic text exercises, 2026-10-11.
+!/04/compare_models_1011.py
+!/10/teacher_t03_1011.py
+!/10/teacher_t04_1011.py
+
+!/11/
+/11/*
+!/11/basic_test.py
+!/11/basic_text_01.py
+!/11/basic_test_02.py
+
+!/tests/
+/tests/*
+!/tests/test_1011_exercises.py
