@@ -1,0 +1,15 @@
+# SMS data preparation contract
+
+The source is [UCI SMS Spam Collection](https://archive.ics.uci.edu/dataset/228/sms%2Bspam%2Bcollection), attributed to Almeida and Hidalgo (2011), [DOI 10.24432/C5CC84](https://doi.org/10.24432/C5CC84). UCI lists 5,574 instances and a [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/), checked on 2026-10-12. Download the original `SMSSpamCollection` file from UCI and keep it locally; no SMS contents are distributed in this repository.
+
+Each physical line is decoded as UTF-8, with a strict `ham`/`spam` label followed by a TAB and the message. The first TAB separates the fields; remaining TABs and body spaces are preserved. Only terminal CR/LF is stripped. Text-mode universal newline handling applies. Physical line numbers start at 1 and remain the record IDs even when invalid rows are skipped. Blank lines, missing separators, unknown labels and blank bodies become issues; file/decoding errors fail the read.
+
+Records have the form `(row_id, text, y)` with `ham=0`, `spam=1`. All valid records are retained. Identical original bodies form one group, and all members stay in one split; conflicting labels in a group reject splitting. No lowercasing, normalization or approximate duplicate detection is performed.
+
+Within each label, groups retain first-occurrence order before shuffling. One local `random.Random(seed)` processes ham then spam, shuffling copies. Each class needs at least seven groups. Integer-floor 70%/15% group counts go to train/validation; the remainder goes to test. These are group proportions, so record counts need not follow exact 70/15/15 proportions. The default seed is 20261012; reproducibility is checked for the recorded Python version, source bytes and rules, not promised across arbitrary environments.
+
+`summarize_split` reports six integers for each split: record count, ham records, spam records, exact-text group count, ham groups, spam groups. Counts never replace membership checks. `validate_split` checks every original ID exactly once and all three pairwise exact-text intersections; it does not detect other forms of related-message leakage.
+
+The local JSON artifact includes schema/rules versions, seed, source SHA256, Python version, the complete implemented policy, quality counts, six-count summaries and ordered ID lists. It contains no message bodies or issue lines. Creation refuses to overwrite an existing file. Loading requires the original data file and verifies metadata, hash, counts, membership, text isolation and the regenerated ID order. A hash detects changed bytes; it does not authenticate the source. The artifact remains ignored by Git.
+
+This stage performs no feature fitting or training. A later vectorizer must learn vocabulary/statistics from training records only, then transform validation/test records using that fitted state. Test data must not choose preprocessing, parameters or thresholds. Exact-text grouping reduces one leakage route but does not establish deployment performance; this historical corpus is not a representative sample of all current SMS traffic.

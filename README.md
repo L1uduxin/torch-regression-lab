@@ -2,6 +2,45 @@
 
 Python／PyTorch 回归模型学习与实践仓库。目前处于基础工程实践阶段，围绕数据预处理、模型训练与保存、加载评估及分组误差分析开展练习，逐步提升实现、结果验证和工程组织能力。
 
+## 2026-10-12：SMS读取、划分与保存
+
+新增 `sms_classifier/` 将已有短信读取、原ID、精确正文分组和划分逻辑封装为独立模块，补齐可执行检查、六项摘要及JSON保存/读回。新包仅使用Python标准库，不拟合词表、不训练分类器。AI封装与新增实现的贡献边界及后续任务见[变更记录](CHANGELOG.md)，数据来源、许可和具体政策见[数据合同](DATA_CARD.md)。
+
+在仓库根目录运行；下列 `PATH_TO_SMS` 和 `NEW_SPLIT_JSON` 需替换为本机原文件和新产物路径，输出父目录须已存在：
+
+```shell
+python -B -m sms_classifier prepare --data PATH_TO_SMS --output NEW_SPLIT_JSON --seed 20261012
+python -B -m sms_classifier check --data PATH_TO_SMS --artifact NEW_SPLIT_JSON
+python -B -m unittest discover -s tests -p "test_sms_data.py" -v
+python -B -m unittest discover -s tests -p "test_*.py" -v
+```
+
+新测试只用人工数据，不下载数据、不训练模型。最后一条包含既有NumPy练习测试，需要已有NumPy环境。`prepare`完成读取、划分、输入保持/复现/隔离检查、写入及读回；`check`验证现有产物。成功退出0，数据或文件检查失败退出2；已有输出拒绝覆盖。stdout只有状态和计数，原短信与问题原行不写入CLI输出或JSON。
+
+最小调用示例（`data_path` 为调用方提供的原始文件路径）：
+
+```python
+from sms_classifier import read_records, split_record_ids, validate_split, summarize_split
+
+records = read_records(data_path)["records"]
+split = split_record_ids(records, seed=20261012)
+validate_split(records, split)
+summary = summarize_split(records, split)
+```
+
+| 接口 | 返回与后续用途 |
+|---|---|
+| `check_line(line)` / `read_records(path)` | 单行标签正文／总行数、原ID记录、问题列表；为数据卡和训练输入提供来源 |
+| `split_record_ids(records, seed)` | train_ids、val_ids、test_ids；冻结后供后续训练／评价选行 |
+| `validate_split(records, split)` | 成功检查字典或异常；检查ID完整和精确正文隔离 |
+| `summarize_split(records, split)` | 三个集合各六项计数；供数据报告及读回对照 |
+| `artifacts.prepare_artifact(data_path, seed)` | 构造含规则、来源hash、计数和ID的字典；不写文件 |
+| `artifacts.save_artifact(artifact, output_path)` | 独占新建JSON；调用方应先prepare，完整源绑定校验在load/verify中 |
+| `artifacts.load_artifact(artifact_path, data_path)` | 全部验证后返回产物；供后续流程复用固定划分 |
+| `artifacts.verify_artifact(artifact, data_path)` | 对已有字典验证并返回检查和摘要 |
+
+以下日期目录保留既有实验内容。短信新包通过相对导入自包含，不依赖旧 `11` 目录的绝对路径。旧回归入口仍需要原本地数据和权重；本次没有全量迁移历史训练项目或重训。
+
 ## 当前范围
 
 当前收录新批次评价流程、MLP前向／单步更新／短训练与恢复源码，以及模型比较、NumPy聚类迭代和人工文本质量检查练习。
@@ -22,7 +61,7 @@ Python／PyTorch 回归模型学习与实践仓库。目前处于基础工程实
 | `10/teacher_t03_1011.py` | 按当前分组求中心均值，并检查平方距离目标 |
 | `10/teacher_t04_1011.py` | 交替分配与更新中心，记录每轮目标和停止原因 |
 | `11/basic_test.py` | 按原文分组并筛出重复文本 |
-| `11/basic_text_01.py` | 分离标签和正文，保留正文内部制表符 |
+| `11/basic_test_01.py` | 分离标签和正文，保留正文内部制表符 |
 | `11/basic_test_02.py` | 构建带原编号的记录，识别同一文本的标签冲突 |
 | `tests/test_1011_exercises.py` | 人工输入上的文本处理与聚类回归检查 |
 
@@ -68,7 +107,7 @@ python teacher_t02_1010.py
 
 `10/teacher_t03_1011.py`和`10/teacher_t04_1011.py`从各自脚本目录读取T01生成的`.npy`；两个新入口不保存数组或模型。已有数组时可分别运行它们，无需重新生成旧数据。
 
-文本脚本只使用源码内的人工短句，没有纳入真实短信数据集。解析时仅移除行尾CR/LF，按第一个制表符切分；原编号保留，ham映射0、spam映射1。重复检查按原文精确匹配；同一文本出现不同标签时返回该组全部原编号，并不自动判断哪条标签错误。输入合同是合法的ham/spam行；标签冲突helper接收非空0/1标签列表，尚无完整文件加载、数据划分或分类模型。
+文本脚本只使用源码内的人工短句，没有纳入真实短信数据集。解析时仅移除行尾CR/LF，按第一个制表符切分；原编号保留，ham映射0、spam映射1。重复检查按原文精确匹配；同一文本出现不同标签时返回该组全部原编号，并不自动判断哪条标签错误。输入合同是合法的ham/spam行；标签冲突helper接收非空0/1标签列表，该历史练习本身不包含文件加载、数据划分或分类模型；当前数据准备见上方sms_classifier包。
 
 从仓库根目录，用已有Python和NumPy运行检查：
 

@@ -32,9 +32,32 @@
 !/11/
 /11/*
 !/11/basic_test.py
-!/11/basic_text_01.py
+!/11/basic_test_01.py
 !/11/basic_test_02.py
 
 !/tests/
 /tests/*
 !/tests/test_1011_exercises.py
+
+# SMS preparation package: explicitly reviewed source, tests and public docs only.
+!/11/basic_text_01.py
+!/sms_classifier/
+/sms_classifier/*
+!/sms_classifier/__init__.py
+!/sms_classifier/__main__.py
+!/sms_classifier/text.py
+!/sms_classifier/data.py
+!/sms_classifier/artifacts.py
+!/sms_classifier/cli.py
+!/tests/test_sms_data.py
+!/DATA_CARD.md
+!/CHANGELOG.md
+
+# Source data, split artifacts, weights, caches and environments stay local.
+__pycache__/
+*.py[cod]
+*.pt
+*.pth
+.env
+.venv/
+artifacts/

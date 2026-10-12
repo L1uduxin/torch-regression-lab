@@ -1,5 +1,5 @@
 
-from basic_text_01 import parse_labeled_line
+from basic_test_01 import parse_labeled_line
 from basic_test import find_duplicate_groups,group_rows_by_text
 
 lines = [
